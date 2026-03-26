@@ -12,11 +12,9 @@ export const metadata = {
 export default function RootLayout({ children }) {
   return (
     <html lang="en">
-      <body className={`${geist.className} bg-black text-white`}>
+      <body className={`${geist.className} bg-black text-white overflow-x-hidden`}>
         <Navbar />
-
-        {/* This is the fix — very generous top padding */}
-        <main className="pt-32 md:pt-14 min-h-screen">
+        <main className="pt-16 md:pt-20 min-h-screen">
           {children}
         </main>
       </body>

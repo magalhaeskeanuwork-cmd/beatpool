@@ -1,4 +1,5 @@
 'use client'
+
 import { useEffect, useState } from 'react'
 import { supabase } from '@/lib/supabase'
 import Link from 'next/link'
@@ -34,9 +35,8 @@ export default function Navbar() {
 
   return (
     <>
-      <nav className="fixed top-0 left-0 right-0 z-50 bg-black border-b border-white/10">
-<div className="max-w-7xl mx-auto px-6 md:px-12 h-18 flex items-center justify-between">
-          {/* Desktop Links */}
+      <nav className="fixed top-0 left-0 right-0 z-50 border-b border-white/10 bg-black/90 backdrop-blur">
+        <div className="max-w-7xl mx-auto px-6 md:px-12 h-16 md:h-20 flex items-center justify-between">
           <div className="hidden md:flex items-center gap-8 h-full">
             {links.map((l) => (
               <Link
@@ -53,15 +53,10 @@ export default function Navbar() {
             ))}
           </div>
 
-          {/* Logo */}
-          <Link 
-            href="/" 
-            className="text-xl font-black tracking-tighter uppercase"
-          >
+          <Link href="/" className="text-xl md:text-2xl font-black tracking-tighter uppercase">
             BEAT<span className="text-red-600">POOL</span>
           </Link>
 
-          {/* Desktop Right Side */}
           <div className="hidden md:flex items-center gap-4 h-full">
             {user ? (
               <>
@@ -104,7 +99,6 @@ export default function Navbar() {
             )}
           </div>
 
-          {/* Mobile Right Side */}
           <div className="md:hidden flex items-center gap-3">
             {!user && (
               <>
@@ -145,7 +139,6 @@ export default function Navbar() {
         </div>
       </nav>
 
-      {/* Mobile Fullscreen Menu */}
       <div className={`fixed inset-0 z-40 bg-black transition-all duration-300 md:hidden ${menuOpen ? 'opacity-100 pointer-events-auto' : 'opacity-0 pointer-events-none'}`}>
         <div className="absolute inset-0 bg-[url('/grid.svg')] opacity-[0.04] pointer-events-none" />
         <div className="flex flex-col justify-between h-full px-8 pt-24 pb-12 relative z-10">
