@@ -1,31 +1,42 @@
 'use client'
 
-import { useEffect, useState } from 'react'
+import { Suspense, useEffect, useState } from 'react'
 import { supabase } from '@/lib/supabase'
 import { useSearchParams } from 'next/navigation'
 import Link from 'next/link'
 
-export default function DealSuccess() {
+function DealSuccessContent() {
   const searchParams = useSearchParams()
   const dealId = searchParams.get('dealId')
   const [done, setDone] = useState(false)
 
   useEffect(() => {
-    if (dealId) handleSuccess()
-  }, [dealId])
+    if (dealId && !done) {
+      handleSuccess()
+    }
+  }, [dealId, done])
 
   async function handleSuccess() {
     const { data: deal } = await supabase
       .from('deals')
-      .select('*, artist:profiles!deals_artist_id_fkey(username, legal_name), producer:profiles!deals_producer_id_fkey(username, legal_name), requests(title, license_type)')
+      .select(
+        '*, artist:profiles!deals_artist_id_fkey(username, legal_name), producer:profiles!deals_producer_id_fkey(username, legal_name), requests(title, license_type)'
+      )
       .eq('id', dealId)
       .single()
 
     if (!deal) return
 
-    await supabase.from('deals').update({ status: 'paid', license_type: deal.requests?.license_type ?? 'lease' }).eq('id', dealId)
+    await supabase
+      .from('deals')
+      .update({ status: 'paid', license_type: deal.requests?.license_type ?? 'lease' })
+      .eq('id', dealId)
 
-    const date = new Date().toLocaleDateString('en-US', { year: 'numeric', month: 'long', day: 'numeric' })
+    const date = new Date().toLocaleDateString('en-US', {
+      year: 'numeric',
+      month: 'long',
+      day: 'numeric',
+    })
 
     const licenseRes = await fetch('/api/generate-license', {
       method: 'POST',
@@ -46,11 +57,17 @@ export default function DealSuccess() {
     const { licenseText } = await licenseRes.json()
     const blob = new Blob([licenseText], { type: 'text/plain' })
     const licenseFilename = `license-${dealId}.txt`
+
     await supabase.storage.from('snippets').upload(licenseFilename, blob, { upsert: true })
-    const { data: { publicUrl } } = supabase.storage.from('snippets').getPublicUrl(licenseFilename)
+
+    const {
+      data: { publicUrl },
+    } = supabase.storage.from('snippets').getPublicUrl(licenseFilename)
+
     await supabase.from('deals').update({ license_url: publicUrl }).eq('id', dealId)
 
     const { data: authData } = await supabase.auth.getUser()
+
     await fetch('/api/send-email', {
       method: 'POST',
       headers: { 'Content-Type': 'application/json' },
@@ -79,27 +96,60 @@ export default function DealSuccess() {
       <div className="relative z-10 max-w-md w-full border border-white/10 p-12 text-center">
         <div className="w-12 h-12 border border-green-500/30 bg-green-500/10 flex items-center justify-center mx-auto mb-8">
           <svg width="20" height="20" viewBox="0 0 20 20" fill="none">
-            <path d="M4 10L8 14L16 6" stroke="#4ade80" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"/>
+            <path
+              d="M4 10L8 14L16 6"
+              stroke="#4ade80"
+              strokeWidth="2"
+              strokeLinecap="round"
+              strokeLinejoin="round"
+            />
           </svg>
         </div>
 
-        <p className="text-[10px] font-mono uppercase tracking-[0.4em] text-white/30 mb-4">/ Payment confirmed</p>
+        <p className="text-[10px] font-mono uppercase tracking-[0.4em] text-white/30 mb-4">
+          / Payment confirmed
+        </p>
         <h1 className="text-4xl font-black uppercase tracking-tighter mb-6">
-          DEAL<br /><span className="text-green-400">LOCKED IN</span>
+          DEAL
+          <br />
+          <span className="text-green-400">LOCKED IN</span>
         </h1>
         <p className="font-mono text-white/40 text-sm mb-12 leading-relaxed">
-          The producer has been notified and will upload the full beat shortly. Check your email for your license agreement.
+          The producer has been notified and will upload the full beat shortly. Check your email
+          for your license agreement.
         </p>
 
         <div className="flex flex-col gap-3">
-          <Link href="/profile" className="block w-full bg-white text-black hover:bg-red-600 hover:text-white font-black uppercase tracking-widest text-xs py-4 transition">
+          <Link
+            href="/profile"
+            className="block w-full bg-white text-black hover:bg-red-600 hover:text-white font-black uppercase tracking-widest text-xs py-4 transition"
+          >
             Go to profile →
           </Link>
-          <Link href="/browse" className="block text-[10px] font-mono uppercase tracking-[0.3em] text-white/20 hover:text-white transition">
+          <Link
+            href="/browse"
+            className="block text-[10px] font-mono uppercase tracking-[0.3em] text-white/20 hover:text-white transition"
+          >
             Back to pool
           </Link>
         </div>
       </div>
     </main>
+  )
+}
+
+export default function DealSuccess() {
+  return (
+    <Suspense
+      fallback={
+        <main className="min-h-screen bg-black text-white flex items-center justify-center">
+          <p className="text-[10px] font-mono uppercase tracking-[0.3em] text-white/30">
+            Loading payment confirmation...
+          </p>
+        </main>
+      }
+    >
+      <DealSuccessContent />
+    </Suspense>
   )
 }

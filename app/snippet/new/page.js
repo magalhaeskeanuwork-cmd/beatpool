@@ -1,10 +1,10 @@
 'use client'
 
-import { useState, useRef } from 'react'
+import { Suspense, useRef, useState } from 'react'
 import { supabase } from '@/lib/supabase'
 import { useRouter, useSearchParams } from 'next/navigation'
 
-export default function SubmitSnippet() {
+function SubmitSnippetContent() {
   const router = useRouter()
   const searchParams = useSearchParams()
   const requestId = searchParams.get('requestId')
@@ -32,15 +32,18 @@ export default function SubmitSnippet() {
     const mediaRecorder = new MediaRecorder(stream)
     mediaRecorderRef.current = mediaRecorder
     chunksRef.current = []
-    mediaRecorder.ondataavailable = e => chunksRef.current.push(e.data)
+
+    mediaRecorder.ondataavailable = (e) => chunksRef.current.push(e.data)
     mediaRecorder.onstop = () => {
       const blob = new Blob(chunksRef.current, { type: 'audio/webm' })
       setAudio(blob)
       setAudioUrl(URL.createObjectURL(blob))
     }
+
     mediaRecorder.start()
     setRecording(true)
     setTimer(10)
+
     let t = 10
     timerRef.current = setInterval(() => {
       t -= 1
@@ -53,7 +56,7 @@ export default function SubmitSnippet() {
     clearInterval(timerRef.current)
     if (mediaRecorderRef.current) {
       mediaRecorderRef.current.stop()
-      mediaRecorderRef.current.stream.getTracks().forEach(t => t.stop())
+      mediaRecorderRef.current.stream.getTracks().forEach((t) => t.stop())
     }
     setRecording(false)
   }
@@ -67,25 +70,57 @@ export default function SubmitSnippet() {
 
   async function handleSubmit() {
     if (!audio) return
+
     setLoading(true)
     setError(null)
-    const { data: { user } } = await supabase.auth.getUser()
-    if (!user) { setError('You must be logged in.'); setLoading(false); return }
 
-    const filename = `${user.id}-${Date.now()}.webm`
-    const { error: uploadError } = await supabase.storage.from('snippets').upload(filename, audio)
-    if (uploadError) { setError(uploadError.message); setLoading(false); return }
+    const {
+      data: { user },
+    } = await supabase.auth.getUser()
 
-    const { data: { publicUrl } } = supabase.storage.from('snippets').getPublicUrl(filename)
+    if (!user) {
+      setError('You must be logged in.')
+      setLoading(false)
+      return
+    }
 
-    const { data, error: insertError } = await supabase.from('snippets').insert({
-      request_id: requestId,
-      producer_id: user.id,
-      audio_url: publicUrl,
-      counter_offer: counterOffer ? parseInt(counterOffer) : null,
-    }).select().single()
+    const extension =
+      audio instanceof File && audio.name?.includes('.')
+        ? audio.name.split('.').pop()
+        : 'webm'
 
-    if (insertError) { setError(insertError.message); setLoading(false); return }
+    const filename = `${user.id}-${Date.now()}.${extension}`
+
+    const { error: uploadError } = await supabase.storage
+      .from('snippets')
+      .upload(filename, audio)
+
+    if (uploadError) {
+      setError(uploadError.message)
+      setLoading(false)
+      return
+    }
+
+    const {
+      data: { publicUrl },
+    } = supabase.storage.from('snippets').getPublicUrl(filename)
+
+    const { data, error: insertError } = await supabase
+      .from('snippets')
+      .insert({
+        request_id: requestId,
+        producer_id: user.id,
+        audio_url: publicUrl,
+        counter_offer: counterOffer ? parseInt(counterOffer, 10) : null,
+      })
+      .select()
+      .single()
+
+    if (insertError) {
+      setError(insertError.message)
+      setLoading(false)
+      return
+    }
 
     setSnippetId(data.id)
     setStoragePath(filename)
@@ -95,8 +130,15 @@ export default function SubmitSnippet() {
 
   async function handleDelete() {
     setLoading(true)
-    if (storagePath) await supabase.storage.from('snippets').remove([storagePath])
-    if (snippetId) await supabase.from('snippets').delete().eq('id', snippetId)
+
+    if (storagePath) {
+      await supabase.storage.from('snippets').remove([storagePath])
+    }
+
+    if (snippetId) {
+      await supabase.from('snippets').delete().eq('id', snippetId)
+    }
+
     setSubmitted(false)
     setSnippetId(null)
     setStoragePath(null)
@@ -109,15 +151,38 @@ export default function SubmitSnippet() {
   async function handleReplaceAudio(e) {
     const file = e.target.files[0]
     if (!file) return
+
     setLoading(true)
-    if (storagePath) await supabase.storage.from('snippets').remove([storagePath])
-    const { data: { user } } = await supabase.auth.getUser()
-    const filename = `${user.id}-${Date.now()}.webm`
-    const { error: uploadError } = await supabase.storage.from('snippets').upload(filename, file)
-    if (uploadError) { setError(uploadError.message); setLoading(false); return }
-    const { data: { publicUrl } } = supabase.storage.from('snippets').getPublicUrl(filename)
+
+    if (storagePath) {
+      await supabase.storage.from('snippets').remove([storagePath])
+    }
+
+    const {
+      data: { user },
+    } = await supabase.auth.getUser()
+
+    const extension = file.name?.includes('.') ? file.name.split('.').pop() : 'webm'
+    const filename = `${user.id}-${Date.now()}.${extension}`
+
+    const { error: uploadError } = await supabase.storage
+      .from('snippets')
+      .upload(filename, file)
+
+    if (uploadError) {
+      setError(uploadError.message)
+      setLoading(false)
+      return
+    }
+
+    const {
+      data: { publicUrl },
+    } = supabase.storage.from('snippets').getPublicUrl(filename)
+
     await supabase.from('snippets').update({ audio_url: publicUrl }).eq('id', snippetId)
+
     setStoragePath(filename)
+    setAudio(file)
     setAudioUrl(URL.createObjectURL(file))
     setLoading(false)
   }
@@ -125,7 +190,12 @@ export default function SubmitSnippet() {
   async function handleUpdateCounterOffer() {
     if (!snippetId) return
     setLoading(true)
-    await supabase.from('snippets').update({ counter_offer: counterOffer ? parseInt(counterOffer) : null }).eq('id', snippetId)
+
+    await supabase
+      .from('snippets')
+      .update({ counter_offer: counterOffer ? parseInt(counterOffer, 10) : null })
+      .eq('id', snippetId)
+
     setLoading(false)
   }
 
@@ -134,34 +204,44 @@ export default function SubmitSnippet() {
       <div className="absolute inset-0 bg-[url('/grid.svg')] opacity-[0.03] pointer-events-none" />
 
       <div className="max-w-2xl mx-auto px-6 md:px-12 py-16 relative z-10">
-
-        {/* Header */}
         <div className="border-b border-white/10 pb-12 mb-16">
-          <p className="text-[10px] font-mono uppercase tracking-[0.4em] text-white/30 mb-4">/ Submit snippet</p>
+          <p className="text-[10px] font-mono uppercase tracking-[0.4em] text-white/30 mb-4">
+            / Submit snippet
+          </p>
           <h1 className="text-5xl md:text-6xl font-black uppercase tracking-tighter leading-none mb-4">
-            YOUR<br /><span className="text-red-600">SNIPPET</span>
+            YOUR
+            <br />
+            <span className="text-red-600">SNIPPET</span>
           </h1>
           {requestTitle && (
             <p className="font-mono text-white/40 text-sm">
               Responding to: <span className="text-white">{requestTitle}</span>
-              {requestBudget && <span className="text-green-400 ml-3 font-bold">${requestBudget}</span>}
+              {requestBudget && (
+                <span className="text-green-400 ml-3 font-bold">${requestBudget}</span>
+              )}
             </p>
           )}
         </div>
 
         {!submitted ? (
           <div className="space-y-6">
-
-            {/* Record */}
             <div className="border border-white/10 p-8">
-              <p className="text-[10px] font-mono uppercase tracking-[0.4em] text-white/30 mb-6">/ Record live</p>
+              <p className="text-[10px] font-mono uppercase tracking-[0.4em] text-white/30 mb-6">
+                / Record live
+              </p>
               <div className="flex items-center gap-4">
                 {!recording ? (
-                  <button onClick={startRecording} className="bg-red-600 hover:bg-red-700 text-white font-black uppercase tracking-widest text-xs px-6 py-3 transition">
+                  <button
+                    onClick={startRecording}
+                    className="bg-red-600 hover:bg-red-700 text-white font-black uppercase tracking-widest text-xs px-6 py-3 transition"
+                  >
                     Start recording
                   </button>
                 ) : (
-                  <button onClick={stopRecording} className="bg-white text-black font-black uppercase tracking-widest text-xs px-6 py-3 transition">
+                  <button
+                    onClick={stopRecording}
+                    className="bg-white text-black font-black uppercase tracking-widest text-xs px-6 py-3 transition"
+                  >
                     Stop
                   </button>
                 )}
@@ -174,9 +254,10 @@ export default function SubmitSnippet() {
               </div>
             </div>
 
-            {/* Upload */}
             <div className="border border-white/10 p-8">
-              <p className="text-[10px] font-mono uppercase tracking-[0.4em] text-white/30 mb-6">/ Or upload a file</p>
+              <p className="text-[10px] font-mono uppercase tracking-[0.4em] text-white/30 mb-6">
+                / Or upload a file
+              </p>
               <input
                 type="file"
                 accept="audio/*"
@@ -185,18 +266,20 @@ export default function SubmitSnippet() {
               />
             </div>
 
-            {/* Preview */}
             {audioUrl && (
               <div className="border border-white/10 p-8">
-                <p className="text-[10px] font-mono uppercase tracking-[0.4em] text-white/30 mb-6">/ Preview</p>
+                <p className="text-[10px] font-mono uppercase tracking-[0.4em] text-white/30 mb-6">
+                  / Preview
+                </p>
                 <audio controls src={audioUrl} className="w-full" />
               </div>
             )}
 
-            {/* Counter offer */}
             <div className="border border-white/10 p-8">
               <div className="flex items-center justify-between mb-4">
-                <p className="text-[10px] font-mono uppercase tracking-[0.4em] text-white/30">/ Counter offer</p>
+                <p className="text-[10px] font-mono uppercase tracking-[0.4em] text-white/30">
+                  / Counter offer
+                </p>
                 <button
                   onClick={() => setShowCounterOffer(!showCounterOffer)}
                   className="text-[10px] font-mono uppercase tracking-widest text-white/30 hover:text-white transition"
@@ -207,14 +290,17 @@ export default function SubmitSnippet() {
               {showCounterOffer && (
                 <div>
                   <p className="font-mono text-white/30 text-xs mb-4">
-                    Propose a different price than the artist's budget of ${requestBudget ?? '—'}
+                    Propose a different price than the artist&apos;s budget of $
+                    {requestBudget ?? '—'}
                   </p>
                   <div className="flex items-center border border-white/10 hover:border-white/20 focus-within:border-white/40 transition">
-                    <span className="text-white/30 font-mono px-4 border-r border-white/10">$</span>
+                    <span className="text-white/30 font-mono px-4 border-r border-white/10">
+                      $
+                    </span>
                     <input
                       type="number"
                       value={counterOffer}
-                      onChange={e => setCounterOffer(e.target.value)}
+                      onChange={(e) => setCounterOffer(e.target.value)}
                       placeholder={requestBudget ?? '100'}
                       className="flex-1 bg-transparent px-4 py-3 font-mono text-sm text-white placeholder-white/20 outline-none"
                     />
@@ -223,7 +309,11 @@ export default function SubmitSnippet() {
               )}
             </div>
 
-            {error && <p className="text-[10px] font-mono uppercase tracking-widest text-red-400">{error}</p>}
+            {error && (
+              <p className="text-[10px] font-mono uppercase tracking-widest text-red-400">
+                {error}
+              </p>
+            )}
 
             <button
               onClick={handleSubmit}
@@ -235,22 +325,26 @@ export default function SubmitSnippet() {
           </div>
         ) : (
           <div className="space-y-6">
-
-            {/* Success */}
             <div className="border border-green-500/20 bg-green-500/5 p-6">
-              <p className="text-[10px] font-mono uppercase tracking-[0.4em] text-green-400 mb-1">✓ Snippet submitted</p>
-              <p className="font-mono text-white/30 text-xs">The artist will be notified and can listen to your snippet.</p>
+              <p className="text-[10px] font-mono uppercase tracking-[0.4em] text-green-400 mb-1">
+                ✓ Snippet submitted
+              </p>
+              <p className="font-mono text-white/30 text-xs">
+                The artist will be notified and can listen to your snippet.
+              </p>
             </div>
 
-            {/* Current audio */}
             <div className="border border-white/10 p-8">
-              <p className="text-[10px] font-mono uppercase tracking-[0.4em] text-white/30 mb-6">/ Your snippet</p>
+              <p className="text-[10px] font-mono uppercase tracking-[0.4em] text-white/30 mb-6">
+                / Your snippet
+              </p>
               <audio controls src={audioUrl} className="w-full" />
             </div>
 
-            {/* Replace */}
             <div className="border border-white/10 p-8">
-              <p className="text-[10px] font-mono uppercase tracking-[0.4em] text-white/30 mb-6">/ Replace audio</p>
+              <p className="text-[10px] font-mono uppercase tracking-[0.4em] text-white/30 mb-6">
+                / Replace audio
+              </p>
               <input
                 type="file"
                 accept="audio/*"
@@ -259,16 +353,19 @@ export default function SubmitSnippet() {
               />
             </div>
 
-            {/* Update counter offer */}
             <div className="border border-white/10 p-8">
-              <p className="text-[10px] font-mono uppercase tracking-[0.4em] text-white/30 mb-6">/ Counter offer</p>
+              <p className="text-[10px] font-mono uppercase tracking-[0.4em] text-white/30 mb-6">
+                / Counter offer
+              </p>
               <div className="flex gap-3">
                 <div className="flex items-center border border-white/10 hover:border-white/20 focus-within:border-white/40 transition flex-1">
-                  <span className="text-white/30 font-mono px-4 border-r border-white/10">$</span>
+                  <span className="text-white/30 font-mono px-4 border-r border-white/10">
+                    $
+                  </span>
                   <input
                     type="number"
                     value={counterOffer}
-                    onChange={e => setCounterOffer(e.target.value)}
+                    onChange={(e) => setCounterOffer(e.target.value)}
                     placeholder={requestBudget ?? '100'}
                     className="flex-1 bg-transparent px-4 py-3 font-mono text-sm text-white placeholder-white/20 outline-none"
                   />
@@ -283,7 +380,11 @@ export default function SubmitSnippet() {
               </div>
             </div>
 
-            {error && <p className="text-[10px] font-mono uppercase tracking-widest text-red-400">{error}</p>}
+            {error && (
+              <p className="text-[10px] font-mono uppercase tracking-widest text-red-400">
+                {error}
+              </p>
+            )}
 
             <button
               onClick={handleDelete}
@@ -296,5 +397,21 @@ export default function SubmitSnippet() {
         )}
       </div>
     </main>
+  )
+}
+
+export default function SubmitSnippetPage() {
+  return (
+    <Suspense
+      fallback={
+        <main className="min-h-screen bg-black text-white flex items-center justify-center">
+          <p className="text-[10px] font-mono uppercase tracking-[0.3em] text-white/30">
+            Loading submit page...
+          </p>
+        </main>
+      }
+    >
+      <SubmitSnippetContent />
+    </Suspense>
   )
 }
