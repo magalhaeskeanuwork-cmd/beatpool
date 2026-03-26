@@ -65,38 +65,36 @@ export default function AboutPage() {
   return (
     <main className="min-h-screen bg-black text-white">
       <section className="border-b border-white/10">
-        <div className="mx-auto max-w-7xl px-6 py-20 md:px-12 md:py-28">
-          <div className="grid gap-16 lg:grid-cols-[1.2fr_0.8fr] lg:gap-20">
-            <div>
-              <p className="mb-6 text-[10px] font-mono uppercase tracking-[0.4em] text-red-500">
+        <div className="mx-auto max-w-7xl px-6 py-20 md:px-12 md:py-24">
+          <div className="grid items-start gap-12 xl:grid-cols-[minmax(0,1.2fr)_360px] xl:gap-16">
+            <div className="min-w-0">
+              <p className="mb-5 text-[10px] font-mono uppercase tracking-[0.35em] text-red-500">
                 / About BeatPool
               </p>
 
-              <h1 className="max-w-5xl text-6xl font-black uppercase tracking-tighter leading-[0.88] sm:text-7xl md:text-8xl lg:text-[8.5rem]">
-                CUSTOM
+              <h1 className="max-w-[12ch] text-4xl font-black uppercase tracking-tighter leading-[0.95] sm:text-5xl md:text-6xl lg:text-7xl">
+                Custom beats,
                 <br />
-                BEATS,
-                <br />
-                <span className="text-red-600">WITHOUT THE GUESSWORK</span>
+                <span className="text-red-600">without the guesswork</span>
               </h1>
             </div>
 
-            <div className="flex flex-col justify-end gap-8">
-              <div className="border border-white/10 p-6 md:p-8">
-                <p className="mb-3 text-[10px] font-mono uppercase tracking-[0.35em] text-white/30">
+            <div className="grid gap-5 xl:pt-8">
+              <div className="border border-white/10 p-5 md:p-6">
+                <p className="mb-3 text-[10px] font-mono uppercase tracking-[0.3em] text-white/30">
                   / The problem
                 </p>
-                <p className="font-mono text-sm leading-relaxed text-white/60 md:text-base">
+                <p className="font-mono text-sm leading-relaxed text-white/60 md:text-[15px]">
                   Artists waste hours scrolling through generic type beats. Producers waste hours
                   making work with no clear buyer in mind.
                 </p>
               </div>
 
-              <div className="border border-white/10 p-6 md:p-8">
-                <p className="mb-3 text-[10px] font-mono uppercase tracking-[0.35em] text-white/30">
+              <div className="border border-white/10 p-5 md:p-6">
+                <p className="mb-3 text-[10px] font-mono uppercase tracking-[0.3em] text-white/30">
                   / The shift
                 </p>
-                <p className="font-mono text-sm leading-relaxed text-white/60 md:text-base">
+                <p className="font-mono text-sm leading-relaxed text-white/60 md:text-[15px]">
                   BeatPool flips the workflow. Artists post the need first. Producers respond to a
                   real brief. The platform becomes a marketplace for fit, not noise.
                 </p>
@@ -107,40 +105,40 @@ export default function AboutPage() {
       </section>
 
       <section className="border-b border-white/10">
-        <div className="mx-auto max-w-7xl px-6 py-16 md:px-12 md:py-24">
-          <div className="mb-10 md:mb-14">
-            <p className="mb-4 text-[10px] font-mono uppercase tracking-[0.4em] text-red-500">
+        <div className="mx-auto max-w-7xl px-6 py-16 md:px-12 md:py-20">
+          <div className="mb-10 md:mb-12">
+            <p className="mb-3 text-[10px] font-mono uppercase tracking-[0.35em] text-red-500">
               / How it works
             </p>
-            <h2 className="text-4xl font-black uppercase tracking-tighter md:text-6xl">
-              FIVE MOVES.
-              <span className="text-red-600"> DONE.</span>
+            <h2 className="text-2xl font-black uppercase tracking-tighter sm:text-3xl md:text-4xl">
+              Five moves.
+              <span className="text-red-600"> Done.</span>
             </h2>
           </div>
 
-          <div className="space-y-4 md:space-y-5">
+          <div className="space-y-4">
             {steps.map((step) => (
               <article
                 key={step.number}
-                className="grid gap-6 border border-white/10 p-6 md:grid-cols-[84px_1fr] md:gap-8 md:p-8"
+                className="grid gap-4 border border-white/10 p-5 md:grid-cols-[64px_1fr] md:gap-6 md:p-6"
               >
-                <div className="text-5xl font-black tracking-tighter leading-none text-red-600/30 md:text-6xl">
+                <div className="text-3xl font-black tracking-tighter leading-none text-red-600/35 md:text-4xl">
                   {step.number}
                 </div>
 
                 <div className="min-w-0">
-                  <div className="mb-4 flex flex-wrap items-center gap-3">
-                    <h3 className="text-2xl font-black uppercase tracking-tighter leading-none md:text-4xl">
+                  <div className="mb-3 flex flex-wrap items-center gap-3">
+                    <h3 className="text-lg font-black uppercase tracking-tighter leading-none md:text-2xl">
                       {step.title}
                     </h3>
                     <span
-                      className={`border px-3 py-1 text-[10px] font-black uppercase tracking-widest ${roleStyle(step.role)}`}
+                      className={`border px-2.5 py-1 text-[10px] font-black uppercase tracking-widest ${roleStyle(step.role)}`}
                     >
                       {step.role}
                     </span>
                   </div>
 
-                  <p className="max-w-4xl font-mono text-sm leading-relaxed text-white/50 md:text-base">
+                  <p className="max-w-4xl font-mono text-sm leading-relaxed text-white/50 md:text-[15px]">
                     {step.description}
                   </p>
                 </div>
@@ -151,29 +149,32 @@ export default function AboutPage() {
       </section>
 
       <section className="border-b border-white/10">
-        <div className="mx-auto max-w-7xl px-6 py-16 md:px-12 md:py-24">
-          <div className="mb-10 md:mb-14">
-            <p className="mb-4 text-[10px] font-mono uppercase tracking-[0.4em] text-red-500">
+        <div className="mx-auto max-w-7xl px-6 py-16 md:px-12 md:py-20">
+          <div className="mb-10 md:mb-12">
+            <p className="mb-3 text-[10px] font-mono uppercase tracking-[0.35em] text-red-500">
               / Licensing
             </p>
-            <h2 className="text-4xl font-black uppercase tracking-tighter md:text-6xl">
-              TWO CLEAR
-              <span className="text-red-600"> OPTIONS</span>
+            <h2 className="text-2xl font-black uppercase tracking-tighter sm:text-3xl md:text-4xl">
+              Two clear
+              <span className="text-red-600"> options</span>
             </h2>
           </div>
 
           <div className="grid gap-6 lg:grid-cols-2">
-            <div className="border border-white/10 p-8 md:p-10">
-              <p className="mb-4 text-[10px] font-mono uppercase tracking-[0.35em] text-blue-400">
+            <div className="border border-white/10 p-6 md:p-8">
+              <p className="mb-3 text-[10px] font-mono uppercase tracking-[0.3em] text-blue-400">
                 / Non-exclusive
               </p>
-              <h3 className="mb-8 text-3xl font-black uppercase tracking-tighter md:text-4xl">
+              <h3 className="mb-6 text-2xl font-black uppercase tracking-tighter md:text-3xl">
                 Lease
               </h3>
 
-              <ul className="space-y-4">
+              <ul className="space-y-3">
                 {licenses.lease.map((item) => (
-                  <li key={item} className="flex items-start gap-3 font-mono text-sm text-white/55 md:text-base">
+                  <li
+                    key={item}
+                    className="flex items-start gap-3 font-mono text-sm text-white/55 md:text-[15px]"
+                  >
                     <span className="mt-0.5 text-blue-400">—</span>
                     <span>{item}</span>
                   </li>
@@ -181,17 +182,20 @@ export default function AboutPage() {
               </ul>
             </div>
 
-            <div className="border border-white/10 p-8 md:p-10">
-              <p className="mb-4 text-[10px] font-mono uppercase tracking-[0.35em] text-red-500">
+            <div className="border border-white/10 p-6 md:p-8">
+              <p className="mb-3 text-[10px] font-mono uppercase tracking-[0.3em] text-red-500">
                 / Exclusive
               </p>
-              <h3 className="mb-8 text-3xl font-black uppercase tracking-tighter md:text-4xl">
+              <h3 className="mb-6 text-2xl font-black uppercase tracking-tighter md:text-3xl">
                 Full Rights
               </h3>
 
-              <ul className="space-y-4">
+              <ul className="space-y-3">
                 {licenses.exclusive.map((item) => (
-                  <li key={item} className="flex items-start gap-3 font-mono text-sm text-white/55 md:text-base">
+                  <li
+                    key={item}
+                    className="flex items-start gap-3 font-mono text-sm text-white/55 md:text-[15px]"
+                  >
                     <span className="mt-0.5 text-red-500">—</span>
                     <span>{item}</span>
                   </li>
@@ -203,8 +207,8 @@ export default function AboutPage() {
       </section>
 
       <footer>
-        <div className="mx-auto flex max-w-7xl flex-col gap-5 px-6 py-10 md:flex-row md:items-center md:justify-between md:px-12">
-          <span className="text-2xl font-black uppercase tracking-tighter">
+        <div className="mx-auto flex max-w-7xl flex-col gap-4 px-6 py-10 md:flex-row md:items-center md:justify-between md:px-12">
+          <span className="text-xl font-black uppercase tracking-tighter">
             BEAT<span className="text-red-600">POOL</span>
           </span>
           <p className="text-[10px] font-mono uppercase tracking-[0.35em] text-white/20">
