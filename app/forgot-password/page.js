@@ -10,20 +10,30 @@ export default function ForgotPasswordPage() {
   const [error, setError] = useState('')
 
   async function handleReset(e) {
-    e.preventDefault()
-    setLoading(true)
-    setMessage('')
-    setError('')
+  e.preventDefault()
+  console.log('RESET SUBMIT STARTED')
+  console.log('Email:', email)
 
-    const { error } = await supabase.auth.resetPasswordForEmail(email, {
-      redirectTo: `${window.location.origin}/reset-password`,
-    })
+  setLoading(true)
+  setError('')
+  setMessage('')
 
-    if (error) {
-      setError(error.message)
-      setLoading(false)
-      return
-    }
+  const { data, error } = await supabase.auth.resetPasswordForEmail(email, {
+    redirectTo: `${window.location.origin}/reset-password`,
+  })
+
+  console.log('RESET RESPONSE DATA:', data)
+  console.log('RESET RESPONSE ERROR:', error)
+
+  if (error) {
+    setError(error.message)
+    setLoading(false)
+    return
+  }
+
+  setMessage('If an account exists for that email, a reset link has been sent.')
+  setLoading(false)
+}
 
     setMessage('Password reset email sent. Check your inbox.')
     setLoading(false)
