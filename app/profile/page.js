@@ -1,6 +1,6 @@
 'use client'
 
-import { Suspense, useEffect, useState } from 'react'
+import { Suspense, useEffect, useEffectEvent, useState } from 'react'
 import { supabase } from '@/lib/supabase'
 import { useRouter, useSearchParams } from 'next/navigation'
 import Link from 'next/link'
@@ -18,10 +18,6 @@ function ProfileContent() {
   const [loading, setLoading] = useState(true)
   const [connecting, setConnecting] = useState(false)
   const [switching, setSwitching] = useState(false)
-
-  useEffect(() => {
-    fetchProfile()
-  }, [])
 
   async function fetchProfile() {
     setLoading(true)
@@ -126,7 +122,7 @@ function ProfileContent() {
     const file = e.target.files[0]
     if (!file) return
 
-    const filename = `fullbeat-${dealId}-${Date.now()}.${file.name.split('.').pop()}`
+    const filename = `fullbeat-${dealId}-${file.lastModified}.${file.name.split('.').pop()}`
     const { error: uploadError } = await supabase.storage.from('snippets').upload(filename, file)
 
     if (uploadError) {
@@ -152,6 +148,14 @@ function ProfileContent() {
       .reduce((sum, d) => sum + Math.round(d.agreed_price * 0.8), 0)
   }
 
+  const loadProfile = useEffectEvent(() => {
+    fetchProfile()
+  })
+
+  useEffect(() => {
+    loadProfile()
+  }, [])
+
   if (loading) {
     return (
       <main className="min-h-screen bg-black text-white flex items-center justify-center">
@@ -161,10 +165,10 @@ function ProfileContent() {
   }
 
   return (
-    <main className="min-h-screen bg-black text-white">
+    <main className="relative min-h-screen w-full overflow-x-clip bg-black text-white">
       <div className="absolute inset-0 bg-[url('/grid.svg')] opacity-[0.03] pointer-events-none" />
 
-      <div className="max-w-7xl mx-auto px-6 md:px-12 py-16 relative z-10">
+      <div className="relative z-10 mx-auto w-full max-w-7xl px-6 py-16 md:px-12">
         {connectStatus === 'success' && (
           <div className="border border-green-500/20 bg-green-500/5 px-6 py-4 mb-12">
             <p className="text-[10px] font-mono uppercase tracking-[0.3em] text-green-400">
@@ -173,7 +177,7 @@ function ProfileContent() {
           </div>
         )}
 
-        <div className="border-b border-white/10 pb-12 mb-16 flex items-end justify-between">
+        <div className="mb-16 flex flex-col gap-8 border-b border-white/10 pb-12 md:flex-row md:items-end md:justify-between">
           <div>
             <p className="text-[10px] font-mono uppercase tracking-[0.4em] text-white/30 mb-4">/ Profile</p>
             <div className="flex items-center gap-6">
@@ -189,7 +193,7 @@ function ProfileContent() {
             </div>
           </div>
 
-          <div className="flex items-center gap-3">
+          <div className="flex flex-wrap items-center gap-3">
             <button
               onClick={handleSwitchRole}
               disabled={switching}
@@ -208,13 +212,13 @@ function ProfileContent() {
 
         {profile?.role === 'artist' && (
           <div className="space-y-16">
-            <div className="grid grid-cols-3 border border-white/10">
+            <div className="grid grid-cols-1 border border-white/10 md:grid-cols-3">
               {[
                 { num: requests.filter((r) => r.status === 'open').length, label: 'Open requests' },
                 { num: requests.filter((r) => r.status !== 'open').length, label: 'Closed requests' },
                 { num: deals.filter((d) => d.status === 'completed').length, label: 'Beats purchased' },
               ].map((s, i) => (
-                <div key={s.label} className={`p-8 ${i !== 2 ? 'border-r border-white/10' : ''}`}>
+                  <div key={s.label} className={`p-8 ${i !== 2 ? 'border-b border-white/10 md:border-b-0 md:border-r' : ''}`}>
                   <p className="text-5xl font-black text-red-500 font-mono tracking-tighter">{s.num}</p>
                   <p className="text-[10px] font-mono uppercase tracking-[0.3em] text-white/30 mt-2">{s.label}</p>
                 </div>
@@ -340,7 +344,7 @@ function ProfileContent() {
 
         {profile?.role === 'producer' && (
           <div className="space-y-16">
-            <div className="grid grid-cols-3 border border-white/10">
+            <div className="grid grid-cols-1 border border-white/10 md:grid-cols-3">
               {[
                 { num: snippets.length, label: 'Snippets submitted', color: 'text-white' },
                 {
@@ -350,14 +354,14 @@ function ProfileContent() {
                 },
                 { num: `$${totalEarnings()}`, label: 'Total earned', color: 'text-green-400' },
               ].map((s, i) => (
-                <div key={s.label} className={`p-8 ${i !== 2 ? 'border-r border-white/10' : ''}`}>
+                <div key={s.label} className={`p-8 ${i !== 2 ? 'border-b border-white/10 md:border-b-0 md:border-r' : ''}`}>
                   <p className={`text-5xl font-black font-mono tracking-tighter ${s.color}`}>{s.num}</p>
                   <p className="text-[10px] font-mono uppercase tracking-[0.3em] text-white/30 mt-2">{s.label}</p>
                 </div>
               ))}
             </div>
 
-            <div className="border border-white/10 p-8 flex items-center justify-between">
+            <div className="flex flex-col gap-6 border border-white/10 p-8 md:flex-row md:items-center md:justify-between">
               <div>
                 <p className="text-[10px] font-mono uppercase tracking-[0.4em] text-white/30 mb-3">/ Payout account</p>
                 {profile?.stripe_onboarded ? (

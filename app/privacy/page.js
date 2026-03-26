@@ -1,7 +1,7 @@
 export default function PrivacyPage() {
   return (
-    <main className="min-h-screen bg-black text-white px-6 py-16">
-      <div className="max-w-3xl mx-auto">
+    <main className="min-h-screen w-full overflow-x-clip bg-black text-white">
+      <div className="mx-auto w-full max-w-3xl px-6 py-16 md:px-12">
         <p className="text-[10px] font-mono uppercase tracking-[0.4em] text-white/30 mb-4">
           / Privacy Policy
         </p>

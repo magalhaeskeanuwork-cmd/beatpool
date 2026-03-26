@@ -38,10 +38,10 @@ export default function Contact() {
   }
 
   return (
-    <main className="min-h-screen bg-black text-white">
+    <main className="relative min-h-screen w-full overflow-x-clip bg-black text-white">
       <div className="absolute inset-0 bg-[url('/grid.svg')] opacity-[0.03] pointer-events-none" />
 
-      <div className="max-w-7xl mx-auto px-6 md:px-12 py-16 relative z-10">
+      <div className="relative z-10 mx-auto w-full max-w-7xl px-6 py-16 md:px-12">
 
         {/* Header */}
         <div className="border-b border-white/10 pb-12 mb-16">
@@ -81,7 +81,7 @@ export default function Contact() {
                 <h2 className="text-5xl font-black uppercase tracking-tighter text-green-400 mb-4">
                   GOT IT.
                 </h2>
-                <p className="font-mono text-white/40 text-sm">We'll get back to you within 24 hours.</p>
+                <p className="font-mono text-white/40 text-sm">We&apos;ll get back to you within 24 hours.</p>
               </div>
             ) : (
               <div className="space-y-4">
@@ -146,8 +146,8 @@ export default function Contact() {
       </div>
 
       {/* Footer */}
-      <footer className="max-w-7xl mx-auto px-6 md:px-12 py-10 border-t border-white/10 mt-24">
-        <div className="flex flex-col md:flex-row items-start md:items-center justify-between gap-6">
+      <footer className="w-full border-t border-white/10 mt-24">
+        <div className="mx-auto flex w-full max-w-7xl flex-col items-start justify-between gap-6 px-6 py-10 md:flex-row md:items-center md:px-12">
           <span className="text-2xl font-black tracking-tighter uppercase">
             BEAT<span className="text-red-600">POOL</span>
           </span>

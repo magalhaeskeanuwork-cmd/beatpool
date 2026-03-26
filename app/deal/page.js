@@ -1,6 +1,6 @@
 'use client'
 
-import { Suspense, useEffect, useState } from 'react'
+import { Suspense, useEffect, useEffectEvent, useState } from 'react'
 import { supabase } from '@/lib/supabase'
 import { useSearchParams } from 'next/navigation'
 import Link from 'next/link'
@@ -16,15 +16,6 @@ function DealContent() {
   const [loading, setLoading] = useState(true)
   const [paying, setPaying] = useState(false)
   const [error, setError] = useState(null)
-
-  useEffect(() => {
-    if (!requestId) {
-      setLoading(false)
-      return
-    }
-
-    fetchDeal()
-  }, [requestId])
 
   async function fetchDeal() {
     setLoading(true)
@@ -109,6 +100,15 @@ function DealContent() {
     window.location.href = url
   }
 
+  const loadDeal = useEffectEvent(() => {
+    fetchDeal()
+  })
+
+  useEffect(() => {
+    if (!requestId) return
+    loadDeal()
+  }, [requestId])
+
   if (loading) {
     return (
       <main className="min-h-screen bg-black text-white flex items-center justify-center">
@@ -140,10 +140,10 @@ function DealContent() {
   }
 
   return (
-    <main className="min-h-screen bg-black text-white">
+    <main className="relative min-h-screen w-full overflow-x-clip bg-black text-white">
       <div className="absolute inset-0 bg-[url('/grid.svg')] opacity-[0.03] pointer-events-none" />
 
-      <div className="max-w-2xl mx-auto px-6 md:px-12 py-16 relative z-10">
+      <div className="relative z-10 mx-auto w-full max-w-2xl px-6 py-16 md:px-12">
         <div className="border-b border-white/10 pb-12 mb-16">
           <p className="text-[10px] font-mono uppercase tracking-[0.4em] text-white/30 mb-4">
             / Deal summary
@@ -162,7 +162,7 @@ function DealContent() {
           ].map((row, i) => (
             <div
               key={row.label}
-              className={`flex items-center justify-between px-8 py-5 ${i !== 3 ? 'border-b border-white/10' : ''}`}
+              className={`flex flex-col gap-2 px-6 py-5 md:flex-row md:items-center md:justify-between md:px-8 ${i !== 3 ? 'border-b border-white/10' : ''}`}
             >
               <span className="text-[10px] font-mono uppercase tracking-[0.3em] text-white/30">
                 {row.label}
@@ -173,7 +173,7 @@ function DealContent() {
             </div>
           ))}
 
-          <div className="flex items-center justify-between px-8 py-5 border-t border-white/10 bg-white/[0.02]">
+          <div className="flex flex-col gap-2 px-6 py-5 border-t border-white/10 bg-white/[0.02] md:flex-row md:items-center md:justify-between md:px-8">
             <span className="text-[10px] font-mono uppercase tracking-[0.3em] text-white/30">
               Status
             </span>
@@ -191,7 +191,7 @@ function DealContent() {
           </div>
 
           {request?.license_type && (
-            <div className="flex items-center justify-between px-8 py-5 border-t border-white/10">
+            <div className="flex flex-col gap-2 px-6 py-5 border-t border-white/10 md:flex-row md:items-center md:justify-between md:px-8">
               <span className="text-[10px] font-mono uppercase tracking-[0.3em] text-white/30">
                 License type
               </span>

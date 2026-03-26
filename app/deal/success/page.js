@@ -1,6 +1,6 @@
 'use client'
 
-import { Suspense, useEffect, useState } from 'react'
+import { Suspense, useEffect, useEffectEvent, useState } from 'react'
 import { supabase } from '@/lib/supabase'
 import { useSearchParams } from 'next/navigation'
 import Link from 'next/link'
@@ -9,12 +9,6 @@ function DealSuccessContent() {
   const searchParams = useSearchParams()
   const dealId = searchParams.get('dealId')
   const [done, setDone] = useState(false)
-
-  useEffect(() => {
-    if (dealId && !done) {
-      handleSuccess()
-    }
-  }, [dealId, done])
 
   async function handleSuccess() {
     const { data: deal } = await supabase
@@ -89,8 +83,18 @@ function DealSuccessContent() {
     setDone(true)
   }
 
+  const processSuccess = useEffectEvent(() => {
+    handleSuccess()
+  })
+
+  useEffect(() => {
+    if (dealId && !done) {
+      processSuccess()
+    }
+  }, [dealId, done])
+
   return (
-    <main className="min-h-screen bg-black text-white flex flex-col items-center justify-center px-6">
+    <main className="relative min-h-screen w-full overflow-x-clip bg-black px-6 text-white flex flex-col items-center justify-center">
       <div className="absolute inset-0 bg-[url('/grid.svg')] opacity-[0.03] pointer-events-none" />
 
       <div className="relative z-10 max-w-md w-full border border-white/10 p-12 text-center">

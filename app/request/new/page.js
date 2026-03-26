@@ -59,10 +59,10 @@ export default function NewRequest() {
   )
 
   return (
-    <main className="min-h-screen bg-black text-white">
+    <main className="relative min-h-screen w-full overflow-x-clip bg-black text-white">
       <div className="absolute inset-0 bg-[url('/grid.svg')] opacity-[0.03] pointer-events-none" />
 
-      <div className="max-w-3xl mx-auto px-6 md:px-12 py-16 relative z-10">
+      <div className="relative z-10 mx-auto w-full max-w-3xl px-6 py-16 md:px-12">
 
         {/* Header */}
         <div className="border-b border-white/10 pb-12 mb-16">
@@ -110,7 +110,7 @@ export default function NewRequest() {
           {/* BPM */}
           <div>
             <label className="text-[10px] font-mono uppercase tracking-[0.4em] text-white/30 block mb-3">BPM Range</label>
-            <div className="flex gap-3 items-center">
+            <div className="flex flex-col gap-3 md:flex-row md:items-center">
               <input
                 type="number"
                 value={form.bpm_min}

@@ -1,7 +1,7 @@
 export default function Terms() {
   return (
-    <main className="min-h-screen bg-black text-white">
-      <section className="max-w-3xl mx-auto px-6 md:px-16 py-24">
+    <main className="min-h-screen w-full overflow-x-clip bg-black text-white">
+      <section className="mx-auto w-full max-w-3xl px-6 py-24 md:px-12">
         <h1 className="text-6xl font-black uppercase tracking-tighter mb-4">
           TERMS OF <span className="text-red-600">SERVICE</span>
         </h1>

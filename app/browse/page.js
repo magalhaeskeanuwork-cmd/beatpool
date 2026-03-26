@@ -1,6 +1,6 @@
 'use client'
 
-import { useEffect, useState } from 'react'
+import { useEffect, useEffectEvent, useState } from 'react'
 import { supabase } from '@/lib/supabase'
 import Link from 'next/link'
 import WavePlayer from '@/components/WavePlayer'
@@ -16,11 +16,6 @@ export default function Browse() {
   const [expanded, setExpanded] = useState({})
   const [snippets, setSnippets] = useState({})
   const [currentUser, setCurrentUser] = useState(null)
-
-  useEffect(() => {
-    getCurrentUser()
-    fetchRequests()
-  }, [genre, mood])
 
   async function getCurrentUser() {
     const { data: { user } } = await supabase.auth.getUser()
@@ -147,12 +142,21 @@ export default function Browse() {
     )
   }
 
+  const syncBrowseData = useEffectEvent(() => {
+    getCurrentUser()
+    fetchRequests()
+  })
+
+  useEffect(() => {
+    syncBrowseData()
+  }, [genre, mood])
+
   return (
-    <main className="min-h-screen bg-black text-white">
-      <div className="max-w-7xl mx-auto px-6 md:px-16 py-16">
+    <main className="min-h-screen w-full overflow-x-clip bg-black text-white">
+      <div className="mx-auto w-full max-w-7xl px-6 py-16 md:px-12">
 
         {/* Header */}
-        <div className="flex items-end justify-between mb-16 border-b border-white/10 pb-8">
+        <div className="mb-16 flex flex-col gap-6 border-b border-white/10 pb-8 md:flex-row md:items-end md:justify-between">
           <div>
             <p className="text-xs uppercase tracking-[0.3em] text-red-500 mb-3">Open requests</p>
             <h1 className="text-6xl md:text-7xl font-black uppercase tracking-tighter leading-none">THE<br />POOL</h1>
@@ -236,7 +240,7 @@ export default function Browse() {
                         <p className="text-xs text-white/30 uppercase tracking-widest">{new Date(req.created_at).toLocaleDateString()}</p>
                       </div>
                     </div>
-                    <div className="flex items-center gap-4">
+                    <div className="flex items-center gap-3 md:gap-4">
                       {statusBadge(req.status)}
                       <span className="text-green-400 font-black text-xl">${req.budget}</span>
                     </div>
@@ -332,7 +336,7 @@ export default function Browse() {
                   )}
 
                   {/* Card footer */}
-                  <div className="flex items-center justify-between border-t border-white/5 pt-6">
+                  <div className="flex flex-col gap-4 border-t border-white/5 pt-6 md:flex-row md:items-center md:justify-between">
                     <button
                       onClick={() => toggleSnippets(req.id)}
                       className="text-xs font-bold uppercase tracking-widest text-white/30 hover:text-white transition"
@@ -342,7 +346,7 @@ export default function Browse() {
                     {!isClosed && (
                       <Link
                         href={`/snippet/new?requestId=${req.id}&title=${encodeURIComponent(req.title)}&budget=${req.budget}`}
-                        className="text-xs font-bold uppercase tracking-widest bg-red-600 hover:bg-red-700 text-white px-5 py-2 transition"
+                        className="w-full text-center text-xs font-bold uppercase tracking-widest bg-red-600 hover:bg-red-700 text-white px-5 py-3 transition md:w-auto md:text-left md:py-2"
                       >
                         Submit snippet →
                       </Link>

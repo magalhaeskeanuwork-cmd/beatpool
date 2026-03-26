@@ -200,10 +200,10 @@ function SubmitSnippetContent() {
   }
 
   return (
-    <main className="min-h-screen bg-black text-white">
+    <main className="relative min-h-screen w-full overflow-x-clip bg-black text-white">
       <div className="absolute inset-0 bg-[url('/grid.svg')] opacity-[0.03] pointer-events-none" />
 
-      <div className="max-w-2xl mx-auto px-6 md:px-12 py-16 relative z-10">
+      <div className="relative z-10 mx-auto w-full max-w-2xl px-6 py-16 md:px-12">
         <div className="border-b border-white/10 pb-12 mb-16">
           <p className="text-[10px] font-mono uppercase tracking-[0.4em] text-white/30 mb-4">
             / Submit snippet
