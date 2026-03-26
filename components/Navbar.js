@@ -37,7 +37,7 @@ export default function Navbar() {
 
   return (
     <>
-      <nav className="fixed top-0 left-0 right-0 z-50 border-b border-white/10 bg-black/90 backdrop-blur">
+      <nav className="fixed top-0 left-0 right-0 z-50 border-b border-white/10 bg-black/80">
         <div className="mx-auto flex h-16 md:h-20 w-full max-w-7xl items-center justify-between px-6 md:px-12">
           <div className="hidden md:flex items-center gap-8 h-full">
             {links.map((l) => (
